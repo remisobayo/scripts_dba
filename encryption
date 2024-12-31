@@ -1,0 +1,15 @@
+
+--check on windows server
+Check certificate details: 
+openssl x509 -text -noout -in <certificate_file>
+openssl x509 -in <certificate_file> -pubkey -noout -outform pem | openssl md5
+
+pkey validation:
+openssl pkey -in <key_file> -pubout -outform pem | openssl md5
+
+Check certificate expiration date: 
+openssl x509 -noout -date -in <certificate_file>
+
+Verify a CSR (Certificate Signing Request): 
+openssl req -text -noout -verify -in <csr_file> 
+openssl req -in <csr_file> -pubkey -noout -outform pem | openssl md5
