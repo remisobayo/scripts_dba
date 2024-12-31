@@ -13,3 +13,42 @@ openssl x509 -noout -date -in <certificate_file>
 Verify a CSR (Certificate Signing Request): 
 openssl req -text -noout -verify -in <csr_file> 
 openssl req -in <csr_file> -pubkey -noout -outform pem | openssl md5
+
+
+Database script to check
+
+SELECT db_name(database_id), encryption_state 
+FROM sys.dm_database_encryption_keys;
+my database instance is not in the result at all. I run another query as follows:
+
+SELECT
+    db.name,
+    db.is_encrypted,
+    dm.encryption_state,
+    dm.percent_complete,
+    dm.key_algorithm,
+    dm.key_length
+FROM
+    sys.databases db
+    LEFT OUTER JOIN sys.dm_database_encryption_keys dm
+        ON db.database_id = dm.database_id;
+GO
+
+-----
+SELECT
+    DB_NAME(e.database_id) AS DatabaseName,
+    e.database_id,
+    e.encryption_state,
+CASE e.encryption_state
+WHEN 0 THEN 'No database encryption key present, no encryption'
+WHEN 1 THEN 'UNENCRYPTED'
+WHEN 2 THEN 'ENCRYPTION_IN_PROGRESS'
+WHEN 3 THEN 'ENCRYPTED'
+WHEN 4 THEN 'KEY_CHANGE_IN_PROGRESS'
+WHEN 5 THEN 'DECRYPTION_IN_PROGRESS'
+END AS encryption_state_desc, c.name, e.percent_complete
+FROM
+    sys.dm_database_encryption_keys as e
+    LEFT JOIN master.sys.asymmetric_keys as c
+        ON e.encryptor_thumbprint = c.thumbprint;
+GO
