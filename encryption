@@ -52,3 +52,8 @@ FROM
     LEFT JOIN master.sys.asymmetric_keys as c
         ON e.encryptor_thumbprint = c.thumbprint;
 GO
+
+
+--
+select * from sys.configurations
+where name like '%EKM%'
